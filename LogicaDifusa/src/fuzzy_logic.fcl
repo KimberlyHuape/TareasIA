@@ -1,0 +1,64 @@
+FUNCTION_BLOCK auto_classification
+
+VAR_INPUT
+    ZONA: REAL;
+    DETALLE: REAL;
+    PRECIO: REAL;
+END_VAR
+
+VAR_OUTPUT
+    categoria : REAL;
+END_VAR
+
+
+// Membresía de la variable ZONA
+FUZZIFY ZONA
+    TERM baja := (100, 1) (250, 0);   
+    TERM media := (100, 0) (250, 1) (500, 0);  
+    TERM alta := (250, 0) (500, 1); 
+END_FUZZIFY
+
+// Membresía de la variable DETALLE
+FUZZIFY DETALLE
+    TERM baja := (100, 1) (250, 0);   
+    TERM media := (100, 0) (250, 1) (500, 0);  
+    TERM alta := (250, 0) (500, 1); 
+END_FUZZIFY
+
+// Membresía de la variable PRECIO
+FUZZIFY PRECIO
+    TERM baja := (100000, 1) (500000, 0);   
+    TERM media := (100000, 0) (500000, 1) (1000000, 0);  
+    TERM alta := (500000, 0) (1000000, 1); 
+END_FUZZIFY
+
+// "categoria"
+DEFUZZIFY categoria
+    TERM casa_chica := (0, 0) (30, 1) (60, 0);   
+    TERM casa_media := (30, 0) (60, 1) (90, 0);  
+    TERM casa_lujo := (60, 0) (90, 1) (100, 0);  
+    METHOD : COG; 
+    DEFAULT := 0;  
+END_DEFUZZIFY
+
+// Bloque de reglas difusas
+RULEBLOCK rules
+    AND : MIN;  
+    ACT : MIN; 
+
+    // Reglas difusas
+    RULE 1 : IF ZONA IS baja AND DETALLE IS baja AND PRECIO IS baja THEN categoria IS casa_chica;
+    RULE 2 : IF ZONA IS media AND DETALLE IS media AND PRECIO IS media THEN categoria IS casa_media;
+    RULE 3 : IF ZONA IS alta AND DETALLE IS alta AND PRECIO IS alta THEN categoria IS casa_lujo;
+    RULE 4 : IF ZONA IS baja AND DETALLE IS baja AND PRECIO IS media THEN categoria IS casa_chica;
+    RULE 5 : IF ZONA IS media AND DETALLE IS baja AND PRECIO IS alta THEN categoria IS casa_media;
+    RULE 6 : IF ZONA IS alta AND DETALLE IS media AND precio IS baja THEN categoria IS casa_chica;
+    RULE 7 : IF ZONA IS baja AND DETALLE IS media AND PRECIO IS alta THEN categoria IS casa_media;
+    RULE 8 : IF ZONA IS media AND DETALLE IS alta AND PRECIO IS media THEN categoria IS casa_lujo;
+    RULE 9 : IF ZONA IS alta AND DETALLE IS alta AND PRECIO IS baja THEN categoria IS casa_chica;
+    RULE 10 : IF ZONA IS baja AND DETALLE IS alta AND PRECIO IS media THEN categoria IS casa_media;
+
+	
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK
